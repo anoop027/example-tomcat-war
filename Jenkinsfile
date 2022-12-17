@@ -20,8 +20,8 @@ pipeline {
                
                 sh "docker login -u anoopd27 -p ${dockerpwd}"
                 }
-                sh "docker build -t anoopd27/pvtrepo1:${BUILD_NUMBER} /var/lib/jenkins/workspace/Java-Tomcat-project1"
-                sh "docker push anoopd27/pvtrepo1:${BUILD_NUMBER}"
+                sh "docker build -t anoopd27/pvtrepo1 /var/lib/jenkins/workspace/Java-Tomcat-project1"
+                sh "docker push anoopd27/pvtrepo1"
             }
         }
         stage('run ansible playbook') {
