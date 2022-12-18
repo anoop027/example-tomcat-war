@@ -20,15 +20,17 @@ pipeline {
                
                 sh "docker login -u anoopd27 -p ${dockerpwd}"
                 }
-                sh "docker build -t anoopd27/pvtrepo1 /var/lib/jenkins/workspace/Java-Tomcat-project1"
-                sh "docker push anoopd27/pvtrepo1"
+                sh "docker build -t anoopd27/pvtrepo1:${BUILD_NUMBER} /var/lib/jenkins/workspace/Java-Tomcat-project1"
+                sh "docker push anoopd27/pvtrepo1:${BUILD_NUMBER}"
             }
         }
         stage('run ansible playbook') {
         agent {label 'ansib1'}
             steps {
-                ansiblePlaybook becomeUser: 'ec2-user', credentialsId: 'ansible-key', installation: 'Ansible1', inventory: '/etc/ansible/hosts', playbook: '/artifact/run-image.yml'
+                withCredentials([string(credentialsId: 'dockerpasswd', variable: 'dockerpwd')]) {
+                ansiblePlaybook becomeUser: 'ec2-user', extras: '--extra-vars "tag=${BUILD_NUMBER} dp=${dockerpwd}"', installation: 'Ansible1', inventory: '/etc/ansible/hosts', playbook: '/artifact/run-image.yml'
                 }
+            }
         }
     }
 }
