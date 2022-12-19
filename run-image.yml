@@ -1,0 +1,7 @@
+---
+-  hosts: tomcat
+   tasks:
+     - name: docker login
+       command: "docker login -u anoopd27 -p {{dp}}"
+     - name: run docker image
+       command: "docker run -itd -p 9998:8080 anoopd27/pvtrepo1:{{tag}}"
