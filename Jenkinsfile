@@ -25,7 +25,7 @@ pipeline {
             }
         }
         stage('run ansible playbook') {
-        agent {label 'ansib1'}
+        agent {label 'ans1'}
             steps {
                 withCredentials([string(credentialsId: 'dockerpasswd', variable: 'dockerpwd')]) {
                 ansiblePlaybook becomeUser: 'ec2-user', extras: '--extra-vars "tag=${BUILD_NUMBER} dp=${dockerpwd}"', installation: 'Ansible1', inventory: '/etc/ansible/hosts', playbook: '/artifact/run-image.yml'
