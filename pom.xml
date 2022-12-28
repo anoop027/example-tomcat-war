@@ -4,7 +4,7 @@
   <groupId>com.example.app</groupId>
   <artifactId>SimpleTomcatWebApp</artifactId>
   <packaging>war</packaging>
-  <version>21.0.0</version>
+  <version>22.0.0</version>
   <name>SimpleTomcatWebApp Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
