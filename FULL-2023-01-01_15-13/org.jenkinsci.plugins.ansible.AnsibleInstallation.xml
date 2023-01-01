@@ -1,0 +1,14 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<org.jenkinsci.plugins.ansible.AnsibleInstallation_-DescriptorImpl plugin="ansible@1.1">
+  <installations class="org.jenkinsci.plugins.ansible.AnsibleInstallation-array">
+    <org.jenkinsci.plugins.ansible.AnsibleInstallation>
+      <name>Ansible1</name>
+      <home></home>
+      <properties>
+        <hudson.tools.InstallSourceProperty>
+          <installers/>
+        </hudson.tools.InstallSourceProperty>
+      </properties>
+    </org.jenkinsci.plugins.ansible.AnsibleInstallation>
+  </installations>
+</org.jenkinsci.plugins.ansible.AnsibleInstallation_-DescriptorImpl>

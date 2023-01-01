@@ -1,0 +1,22 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<hudson.plugins.sonar.SonarGlobalConfiguration plugin="sonar@2.15">
+  <installations>
+    <hudson.plugins.sonar.SonarInstallation>
+      <name>SonarQube</name>
+      <serverUrl>http://172.31.53.15:9000</serverUrl>
+      <credentialsId>fbaa6537-66f3-4fad-98d7-ba92b5263415</credentialsId>
+      <webhookSecretId></webhookSecretId>
+      <mojoVersion></mojoVersion>
+      <additionalProperties></additionalProperties>
+      <additionalAnalysisProperties></additionalAnalysisProperties>
+      <triggers>
+        <skipScmCause>false</skipScmCause>
+        <skipUpstreamCause>false</skipUpstreamCause>
+        <envVar></envVar>
+      </triggers>
+    </hudson.plugins.sonar.SonarInstallation>
+  </installations>
+  <buildWrapperEnabled>true</buildWrapperEnabled>
+  <dataMigrated>true</dataMigrated>
+  <credentialsMigrated>true</credentialsMigrated>
+</hudson.plugins.sonar.SonarGlobalConfiguration>

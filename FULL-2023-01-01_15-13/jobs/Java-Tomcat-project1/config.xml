@@ -1,0 +1,107 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1186.v8def1a_5f3944">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2097.v33db_b_de764b_e"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2097.v33db_b_de764b_e">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers>
+        <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.34.3">
+          <spec></spec>
+        </com.cloudbees.jenkins.GitHubPushTrigger>
+      </triggers>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2725.v7b_c717eb_12ce">
+    <script>pipeline {
+    agent any
+
+    tools {
+        // Install the Maven version configured as &quot;M3&quot; and add it to the path.
+        maven &quot;MyMaven&quot;
+    }
+    stages{
+    stage(&apos;Git checkout&apos;) {
+            steps {
+                // Get some code from a GitHub repository
+                git &apos;https://github.com/anoop027/example-tomcat-war&apos;
+            }
+        }
+     stage(&quot;reading properties file&quot;) 
+     {
+      steps {
+        // Use a script block to do custom scripting
+        script {
+            def mavenPom = readMavenPom file: &apos;/var/lib/jenkins/workspace/Java-Tomcat-project1/pom.xml&apos; 
+            env.ver=mavenPom.version
+        }
+        echo &quot;version is $ver&quot;
+    }
+}
+        
+        stage(&apos;Build&apos;) {
+            steps {
+                sh &quot;mvn  clean package&quot;
+            }
+        }
+        stage (&apos;Code Quality scan&apos;)  {
+            steps {
+            withSonarQubeEnv(&apos;SonarQube&apos;) {
+            sh &quot;mvn sonar:sonar&quot;
+              }
+            }
+        }
+        stage(&quot;Quality Gate&quot;) {
+            steps {
+              timeout(time: 1, unit: &apos;HOURS&apos;) {
+                waitForQualityGate abortPipeline: true
+              }
+            }
+          }
+        stage(&apos;upload war file to nexus&apos;) {
+            steps {
+                script{
+                def mavenPom = readMavenPom file: &apos;pom.xml&apos;
+                nexusArtifactUploader artifacts: [[artifactId: &apos;SimpleTomcatWebApp&apos;, classifier: &apos;&apos;, file: &apos;target/SimpleTomcatWebApp.war&apos;, type: &apos;war&apos;]], credentialsId: &apos;nexus3&apos;, groupId: &apos;com.example.app&apos;, nexusUrl: &apos;172.31.65.133:8081/&apos;, nexusVersion: &apos;nexus3&apos;, protocol: &apos;http&apos;, repository: &apos;java-app-artifact&apos;, version: &quot;${mavenPom.version}&quot;
+            }
+        }
+        }
+        stage(&apos;build docker file&apos;) {
+            steps {
+                script{
+                
+                sh &quot;docker build -t mydockerrepo:${env.ver} /var/lib/jenkins/workspace/Java-Tomcat-project1&quot;
+                sh &quot;docker tag mydockerrepo:${env.ver} 217747396203.dkr.ecr.us-east-1.amazonaws.com/mydockerrepo:${env.ver}&quot;
+            }
+            }
+        }
+        stage(&apos;push docker image to ECR&apos;) {
+            steps {
+                sh &quot;aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 217747396203.dkr.ecr.us-east-1.amazonaws.com&quot;
+                sh &quot;docker push 217747396203.dkr.ecr.us-east-1.amazonaws.com/mydockerrepo:${env.ver}&quot;
+
+            }
+        }
+        stage(&apos;deploy to EKS from Ansible&apos;) {
+        agent {label &apos;ubuntu-ansible&apos;}
+            steps {
+                sh &quot;echo ${env.ver}&quot;
+                ansiblePlaybook become: true, becomeUser: &apos;ubuntu&apos;, credentialsId: &apos;ubuntu-ansible-pwd&apos;, extras: &quot;-e DOCKER_TAG=${env.ver} -e chartver=${BUILD_NUMBER}&quot;, installation: &apos;Ansible1&apos;, inventory: &apos;/home/ubuntu/aws_ec2.yml&apos;, playbook: &apos;/home/ubuntu/run-image.yml&apos;
+            }
+    }
+}
+}
+</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
